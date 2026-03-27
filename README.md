@@ -1,40 +1,25 @@
 # AI 学习
 
+> 记录Javaer学习AI的过程
+
 ## 大模型
-
-
-
 
 ## MCP
 
-
-
 ## RAG
-- [ ] #### 什么是RAG？
-
-
-
 
 ## Agent
 
+### AgentScope
 
 
 ## Workflow
 
-
-
 ## Agent Skills
-
-
 
 ## Agent实战
 
-
-
 ## 面试题
-
-
-
 
 ## 他山之石
 
