@@ -25,6 +25,12 @@
 
 [AIGC算法工程师面试秘籍](https://github.com/WeThinkIn/AIGC-Interview-Book)
 
-[从零开始构建智能体](https://github.com/datawhalechina/Hello-Agents)
+[Hello-Agents](https://github.com/datawhalechina/Hello-Agents)
 
 [AgentScope Java](https://java.agentscope.io/zh/intro.html)
+
+[AGI 掘金知识库](https://agijuejin.feishu.cn/wiki/UvJPwhfkiitMzhkhEfycUnS9nAm)
+
+[AgentGuide](https://github.com/adongwanai/AgentGuide)
+
+[Awesome LLM Apps](https://github.com/Shubhamsaboo/awesome-llm-apps)
