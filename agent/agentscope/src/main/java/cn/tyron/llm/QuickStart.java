@@ -24,10 +24,10 @@ public class QuickStart {
         ReActAgent jarvis = ReActAgent.builder()
                 .name("Jarvis")
                 .sysPrompt("你是一个名为 Jarvis 的助手")
-                .model(AnthropicChatModel.builder()
-                        .baseUrl("https://api.minimaxi.com/anthropic")
-                        .apiKey("sk-cp-aWuMoiIEY_wW2Wr-mZ1Jp0SBz4gvpLDDX8GY1AE3trHMVxz5xXe4AvERtwWGa_SzT3fqccEzm5d8zvl9Ks7dQOsI-9VcyhJ3v8Pzpycf9pp_UIwi0k73_9Y")
-                        .modelName("MiniMax-M2.7") // MiniMax M2.7 模型
+                .model(OpenAIChatModel.builder()
+                        .baseUrl("https://free.9e.nz")
+                        .apiKey("sk-136d55f8b8f04b118588fc8d29f6932c002cd23ea626a34872e62975987e0905")
+                        .modelName("GPT-5 Codex") // MiniMax M2.7 模型
                         .build())
                 .toolkit(toolkit)
                 .build();
