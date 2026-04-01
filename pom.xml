@@ -20,6 +20,8 @@
         <module>agent</module>
         <module>agent/agentscope</module>
         <module>rag</module>
+        <module>product</module>
+        <module>product/pdf-export</module>
     </modules>
 
     <properties>
