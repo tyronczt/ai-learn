@@ -1,7 +1,7 @@
 ## 产品概述
 
 基于 Spring Boot 的 PDF 模板导出系统，实现 PDF 模板上传、AI 转换为 XSL-FO 模板、数据填充导出三大核心功能。
-
+![核心功能](docs/pdf-export-naruto-ch01.png)
 ## 核心功能
 
 - **PDF 模板上传**：用户通过 Web 页面上传 PDF 文件，文件存入 MinIO（bucket: pdfexport），模板元信息存入 MySQL
@@ -39,7 +39,7 @@
 | **输出格式**  | 纯文本/字符串               | Markdown、JSON、LaTeX、CSV、HTML |
 | **开源协议**  | Apache 2.0            | AGPL-3.0                     |
 
-
+![技术选型](docs/pdf-export-naruto-ch02.png)
 ### 选型结论：Apache PDFBox
 
 **选择理由**：
@@ -56,7 +56,7 @@
 - 文本提取顺序可能错乱 → 在 Prompt 中要求 LLM 按语义重新组织内容
 
 ---
-
+![AI转换](docs/pdf-export-naruto-ch04.png)
 ## 技术栈
 
 - **基础框架**：Spring Boot 3.5.6 + Java 21
@@ -69,9 +69,8 @@
 - **工具库**：Lombok
 
 ## 实现方案
-
 ### 整体架构
-
+![页面规划](docs/pdf-export-naruto-ch05.png)
 采用分层架构（Controller → Service → Mapper/Client），核心流程为：
 
 ```
@@ -210,7 +209,6 @@ product/pdf-export/
 
 ## Agent Extensions
 
-- **pdf**
 - Purpose: 在 PDF 解析和生成过程中提供参考，确保 PDFBox 文本提取和 FOP 渲染的最佳实践
 - Expected outcome: 正确的 PDF 文本提取逻辑和高质量的 FOP 渲染配置
 
