@@ -212,14 +212,14 @@
                     })
                 });
                 
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(error);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message);
                 }
                 
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                pdfFrame.src = url;
+                // 使用 MinIO 预签名 URL 预览 PDF
+                pdfFrame.src = result.pdfUrl;
                 
             } catch (error) {
                 alert('PDF 生成失败：' + error.message);

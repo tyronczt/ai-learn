@@ -32,7 +32,8 @@ public class FoConvertService {
             2. 业务数据必须使用 ${fieldName} 占位符表示，例如 ${meetingName}、${meetingTime}
             3. 占位符名称应该是英文，清晰表达字段含义
             4. 确保输出的是完整的 XSL-FO 文档结构
-            5. 对于会议记录类文档，识别以下字段并用占位符替换：
+            5. 字体必须使用 "Microsoft YaHei"、"SimSun"、"SimHei" 或 "STSong"，不要使用其他字体
+            6. 对于会议记录类文档，识别以下字段并用占位符替换：
                - 会议名称 → ${meetingName}
                - 会议时间 → ${meetingTime}
                - 会议地点 → ${meetingLocation}
@@ -52,7 +53,7 @@ public class FoConvertService {
                 </fo:simple-page-master>
               </fo:layout-master-set>
               <fo:page-sequence master-reference="main">
-                <fo:flow flow-name="xsl-region-body">
+                <fo:flow flow-name="xsl-region-body" font-family="Microsoft YaHei">
                   <!-- 内容区域 -->
                 </fo:flow>
               </fo:page-sequence>
@@ -60,8 +61,9 @@ public class FoConvertService {
             ```
     
             ## 中文支持：
-            - 使用中文字体时，font-family 设置为 "Microsoft YaHei", "SimSun", "STSong-Light"
+            - 必须使用 "Microsoft YaHei"、"SimSun"、"SimHei" 或 "STSong" 字体
             - 示例：<fo:block font-family="Microsoft YaHei">中文内容</fo:block>
+            - 重要：所有中文文本都必须指定 font-family 属性，否则会默认使用 Times 字体导致中文无法显示
     
             ## 常见 XSL-FO 元素：
             - fo:block: 块级元素（段落）
@@ -82,10 +84,10 @@ public class FoConvertService {
                 
             你应该生成：
             ```xml
-            <fo:block font-size="18pt" font-weight="bold" text-align="center" space-after="12pt">
+            <fo:block font-family="Microsoft YaHei" font-size="18pt" font-weight="bold" text-align="center" space-after="12pt">
               ${meetingName}
             </fo:block>
-            <fo:table>
+            <fo:table font-family="Microsoft YaHei">
               <fo:table-row>
                 <fo:table-cell><fo:block>会议时间：</fo:block></fo:table-cell>
                 <fo:table-cell><fo:block>${meetingTime}</fo:block></fo:table-cell>
@@ -106,6 +108,10 @@ public class FoConvertService {
             ```
     
             请仔细分析 PDF 内容，保持原有布局结构，将具体的业务数据用占位符替换。
+            重要：
+            1. 字体只能使用 "Microsoft YaHei"、"SimSun"、"SimHei" 或 "STSong"
+            2. 每个包含中文的 fo:block 或 fo:table 元素都必须明确指定 font-family 属性
+            3. 不要依赖继承，因为 FOP 可能不会正确继承字体设置
             """;
 
     /**

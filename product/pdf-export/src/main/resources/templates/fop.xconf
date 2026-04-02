@@ -12,41 +12,51 @@
                 <value>flate</value>
             </filterList>
             <fonts>
+                <!-- 微软雅黑 -->
                 <font kerning="yes" embed-url="fonts/msyh.ttc" sub-font="Microsoft YaHei">
                     <font-triplet name="Microsoft YaHei" style="normal" weight="normal"/>
-                    <font-triplet name="微软雅黑" style="normal" weight="normal"/>
-                </font>
-
-                <font kerning="yes" embed-url="fonts/msyhbd.ttc" sub-font="Microsoft YaHei Bold">
                     <font-triplet name="Microsoft YaHei" style="normal" weight="bold"/>
+                    <font-triplet name="Microsoft YaHei" style="normal" weight="400"/>
+                    <font-triplet name="Microsoft YaHei" style="normal" weight="700"/>
+                    <font-triplet name="微软雅黑" style="normal" weight="normal"/>
                     <font-triplet name="微软雅黑" style="normal" weight="bold"/>
+                    <font-triplet name="微软雅黑" style="normal" weight="400"/>
+                    <font-triplet name="微软雅黑" style="normal" weight="700"/>
                 </font>
 
+                <!-- 宋体 -->
                 <font kerning="yes" embed-url="fonts/simsun.ttc" sub-font="SimSun">
                     <font-triplet name="SimSun" style="normal" weight="normal"/>
-                    <font-triplet name="宋体" style="normal" weight="normal"/>
-                </font>
-
-                <font kerning="yes" embed-url="fonts/simhei.ttf">
                     <font-triplet name="SimSun" style="normal" weight="bold"/>
+                    <font-triplet name="SimSun" style="normal" weight="400"/>
+                    <font-triplet name="SimSun" style="normal" weight="700"/>
+                    <font-triplet name="宋体" style="normal" weight="normal"/>
                     <font-triplet name="宋体" style="normal" weight="bold"/>
+                    <font-triplet name="宋体" style="normal" weight="400"/>
+                    <font-triplet name="宋体" style="normal" weight="700"/>
                 </font>
 
+                <!-- 黑体 -->
                 <font kerning="yes" embed-url="fonts/simhei.ttf">
                     <font-triplet name="SimHei" style="normal" weight="normal"/>
-                    <font-triplet name="黑体" style="normal" weight="normal"/>
                     <font-triplet name="SimHei" style="normal" weight="bold"/>
+                    <font-triplet name="SimHei" style="normal" weight="400"/>
+                    <font-triplet name="SimHei" style="normal" weight="700"/>
+                    <font-triplet name="黑体" style="normal" weight="normal"/>
                     <font-triplet name="黑体" style="normal" weight="bold"/>
+                    <font-triplet name="黑体" style="normal" weight="400"/>
+                    <font-triplet name="黑体" style="normal" weight="700"/>
                 </font>
-
+                
+                <!-- 华文宋体 -->
                 <font kerning="yes" embed-url="fonts/STSong.ttf">
                     <font-triplet name="STSong" style="normal" weight="normal"/>
+                    <font-triplet name="STSong" style="normal" weight="400"/>
+                    <font-triplet name="STSong" style="normal" weight="700"/>
+                    <font-triplet name="华文宋体" style="normal" weight="normal"/>
+                    <font-triplet name="华文宋体" style="normal" weight="400"/>
+                    <font-triplet name="华文宋体" style="normal" weight="700"/>
                 </font>
-
-                <font kerning="yes" embed-url="fonts/simhei.ttf">
-                    <font-triplet name="STSong" style="normal" weight="bold"/>
-                </font>
-
             </fonts>
         </renderer>
     </renderers>

@@ -87,19 +87,39 @@ public class PdfExportService {
             
             Fop fop = factory.newFop(MimeConstants.MIME_PDF, foUserAgent, outputStream);
             
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
+            // 记录 FO 内容
+            log.info("FO 内容长度：{} 字符", foContent.length());
+            log.debug("FO 内容预览：{}", foContent.substring(0, Math.min(500, foContent.length())));
             
-            Source source = new StreamSource(new StringReader(foContent));
-            Result result = new StreamResult(outputStream);
+            // 直接使用 FOP 进行转换
+            javax.xml.transform.Source source = new javax.xml.transform.stream.StreamSource(new StringReader(foContent));
+            javax.xml.transform.Result result = new javax.xml.transform.sax.SAXResult(fop.getDefaultHandler());
             
+            javax.xml.transform.Transformer transformer = javax.xml.transform.TransformerFactory.newInstance().newTransformer();
             transformer.transform(source, result);
             
-            log.info("PDF渲染成功，大小: {} bytes", outputStream.size());
-            return outputStream.toByteArray();
+            byte[] pdfBytes = outputStream.toByteArray();
+            log.info("PDF 渲染成功，大小：{} bytes", pdfBytes.length);
+            
+            // 验证 PDF 有效性
+            if (pdfBytes.length < 1000) {
+                String content = new String(pdfBytes);
+                log.warn("PDF 文件过小 ({})，可能存在渲染问题。实际内容:\n{}", pdfBytes.length, content);
+            }
+            
+            // 检查是否是有效的 PDF（应该以 %PDF- 开头）
+            if (pdfBytes.length > 5) {
+                String header = new String(pdfBytes, 0, Math.min(8, pdfBytes.length));
+                if (!header.startsWith("%PDF-")) {
+                    log.error("生成的不是有效的 PDF 文件！文件头：{}", header);
+                    throw new RuntimeException("PDF 渲染失败：生成的文件不是有效的 PDF 格式");
+                }
+            }
+                        
+            return pdfBytes;
             
         } catch (Exception e) {
-            log.error("PDF渲染失败", e);
+            log.error("PDF渲染失败: {}", e.getMessage(), e);
             throw new RuntimeException("PDF渲染失败: " + e.getMessage(), e);
         }
     }

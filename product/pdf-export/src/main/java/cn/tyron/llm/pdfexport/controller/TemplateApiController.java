@@ -341,22 +341,28 @@ public class TemplateApiController {
     }
 
     /**
-     * FO 模板实时预览 - 生成 PDF
+     * FO 模板实时预览 - 生成 PDF 并上传到 MinIO，返回预览 URL
      */
     @PostMapping("/{id}/preview")
-    public ResponseEntity<byte[]> previewFo(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public Map<String, Object> previewFo(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Map<String, Object> result = new HashMap<>();
+        
         try {
             log.info("开始预览 PDF，模板 ID: {}", id);
             
             PdfTemplate template = templateMapper.selectById(id);
             if (template == null) {
                 log.warn("模板不存在，ID: {}", id);
-                return ResponseEntity.notFound().build();
+                result.put("success", false);
+                result.put("message", "模板不存在");
+                return result;
             }
             
             if (template.getFoContent() == null) {
                 log.warn("模板 FO 内容为空，ID: {}", id);
-                return ResponseEntity.badRequest().body(null);
+                result.put("success", false);
+                result.put("message", "模板 FO 内容为空");
+                return result;
             }
             
             // 优先使用前端传来的 foContent，如果没有则使用数据库中的
@@ -383,14 +389,90 @@ public class TemplateApiController {
             
             log.info("PDF 生成成功，大小：{} bytes", pdfBytes.length);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
+            // 验证 PDF 大小
+            if (pdfBytes.length < 5000) {
+                String content = new String(pdfBytes);
+                log.warn("PDF 文件过小，可能渲染有问题。内容预览: {}", content.substring(0, Math.min(500, content.length())));
+            }
             
-            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+            // 上传到 MinIO
+            String pdfKey = minioService.uploadBytes(pdfBytes, "preview.pdf", "application/pdf");
+            
+            // 生成预览 URL（有效期 1 小时）
+            String previewUrl = minioService.getPresignedUrl(pdfKey, 3600);
+            
+            log.info("PDF 预览 URL 生成成功: {}", previewUrl);
+            
+            result.put("success", true);
+            result.put("pdfUrl", previewUrl);
+            result.put("pdfKey", pdfKey);
+            result.put("size", pdfBytes.length);
+            
+            return result;
             
         } catch (Exception e) {
             log.error("预览失败，模板 ID: {}", id, e);
-            return ResponseEntity.internalServerError().body(null);
+            result.put("success", false);
+            result.put("message", "PDF预览失败: " + e.getMessage());
+            result.put("errorType", e.getClass().getSimpleName());
+            return result;
+        }
+    }
+    
+    /**
+     * 测试 FOP 渲染 - 使用最简单的 FO 模板
+     */
+    @GetMapping("/test-fop")
+    public Map<String, Object> testFop() {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // 使用不带 font-family 的最简单的 FO
+            String testFo = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+                  <fo:layout-master-set>
+                    <fo:simple-page-master master-name="main"
+                          page-width="210mm" page-height="297mm"
+                          margin-top="20mm" margin-bottom="20mm"
+                          margin-left="25mm" margin-right="25mm">
+                      <fo:region-body/>
+                    </fo:simple-page-master>
+                  </fo:layout-master-set>
+                  <fo:page-sequence master-reference="main">
+                    <fo:flow flow-name="xsl-region-body">
+                      <fo:block font-size="24pt" font-weight="bold" text-align="center">
+                        Test Title
+                      </fo:block>
+                      <fo:block font-size="12pt" space-before="12pt">
+                        This is a test document.
+                      </fo:block>
+                    </fo:flow>
+                  </fo:page-sequence>
+                </fo:root>
+                """;
+            
+            log.info("测试 FOP 渲染，FO 长度: {}", testFo.length());
+            
+            byte[] pdfBytes = pdfExportService.renderToPdf(testFo);
+            
+            log.info("测试 PDF 生成成功，大小: {} bytes", pdfBytes.length);
+            
+            // 上传到 MinIO
+            String pdfKey = minioService.uploadBytes(pdfBytes, "test.pdf", "application/pdf");
+            String previewUrl = minioService.getPresignedUrl(pdfKey, 3600);
+            
+            result.put("success", true);
+            result.put("pdfUrl", previewUrl);
+            result.put("size", pdfBytes.length);
+            
+            return result;
+            
+        } catch (Exception e) {
+            log.error("测试 FOP 失败", e);
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            return result;
         }
     }
 }

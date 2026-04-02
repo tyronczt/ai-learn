@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -34,6 +35,26 @@ public class MinioService {
         log.info("文件上传成功: {}", objectKey);
         return objectKey;
     }
+    
+    /**
+     * 上传 byte[] 到 MinIO
+     */
+    public String uploadBytes(byte[] data, String filename, String contentType) throws Exception {
+        String objectKey = "previews/" + UUID.randomUUID() + "-" + filename;
+        
+        // 确保bucket存在
+        ensureBucketExists();
+        
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(minioConfig.getBucket())
+                .object(objectKey)
+                .stream(new ByteArrayInputStream(data), data.length, 10485760)
+                .contentType(contentType)
+                .build());
+        
+        log.info("文件上传成功: {}, 大小: {} bytes", objectKey, data.length);
+        return objectKey;
+    }
 
     public InputStream downloadFile(String objectKey) throws Exception {
         return minioClient.getObject(GetObjectArgs.builder()
@@ -56,6 +77,18 @@ public class MinioService {
                 .bucket(minioConfig.getBucket())
                 .object(objectKey)
                 .expiry(3600)
+                .build());
+    }
+    
+    /**
+     * 获取预签名 URL，自定义过期时间
+     */
+    public String getPresignedUrl(String objectKey, int expirySeconds) throws Exception {
+        return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                .method(Method.GET)
+                .bucket(minioConfig.getBucket())
+                .object(objectKey)
+                .expiry(expirySeconds)
                 .build());
     }
 
