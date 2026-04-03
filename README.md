@@ -16,8 +16,7 @@
 
 ### 🎯 Agent (智能体)
 #### AgentScope
-- 基于 AgentScope 框架的智能体开发
-- 查看 [AgentScope 示例](agent/agentscope/)
+- 基于 [AgentScope 示例](agent/agentscope/) 框架的智能体开发
 
 #### Workflow
 - 工作流编排与自动化
