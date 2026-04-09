@@ -22,6 +22,7 @@
         <module>rag</module>
         <module>product</module>
         <module>product/pdf-export</module>
+        <module>llm-base</module>
     </modules>
 
     <properties>
