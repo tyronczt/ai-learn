@@ -5,7 +5,8 @@
 ## 📚 核心模块
 
 ### 🤖 大模型
-- LLM 基础理论与应用实践
+- [LLM 基础理论与应用实践](llm-base/README.md)
+- 从入门到精通的大模型学习路径
 
 ### 🔗 MCP (Model Context Protocol)
 - 大模型上下文协议学习与探索
