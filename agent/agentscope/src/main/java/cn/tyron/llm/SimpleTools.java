@@ -5,7 +5,7 @@ import io.agentscope.core.tool.ToolParam;
 
 /**
  * @description: 工具类
- * @author: chenzt
+ * @author: tyron
  * @create: 2026-03-27
  **/
 public class SimpleTools {

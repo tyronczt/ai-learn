@@ -4,3 +4,4 @@ target
 /agent/agentscope/.classpath
 /agent/agentscope/.project
 /.vscode/settings.json
+rag/src/main/resources/application.yml
