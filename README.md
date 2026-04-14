@@ -14,15 +14,7 @@
 [RAG从理论到实践的完整学习路径](rag/README.md)
 
 ### 🎯 Agent (智能体)
-#### AgentScope
-- 基于 [AgentScope 示例](agent/agentscope/) 框架的智能体开发
-
-#### Workflow
-- 工作流编排与自动化
-
-#### Agent Skills
-- 智能体工具与技能扩展
-
+- 基于 Java 的智能体开发实践
 
 ## 💼 实战项目
 
