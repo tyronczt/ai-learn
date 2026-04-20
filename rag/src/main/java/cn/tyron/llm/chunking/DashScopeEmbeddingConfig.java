@@ -5,8 +5,8 @@ import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,11 +35,10 @@ public class DashScopeEmbeddingConfig {
 
     /**
      * 利用 Starter 自动配置的 ChatModel 创建 ChatClient
-     * spring-ai-alibaba-starter-dashscope 会自动注册 ChatModel bean
+     * 指定使用 dashScopeChatModel
      */
     @Bean
-    @ConditionalOnMissingBean
-    public ChatClient chatClient(ChatModel chatModel) {
+    public ChatClient chatClient(@Qualifier("dashScopeChatModel") ChatModel chatModel) {
         return ChatClient.create(chatModel);
     }
 }
