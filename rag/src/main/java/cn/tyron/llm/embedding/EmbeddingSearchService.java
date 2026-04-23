@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * @description: 从 chunk 到向量，再到相似度检索
- * @author: chenzt
+ * @author: tyron
  * @create: 2026-04-20
  **/
 @Component

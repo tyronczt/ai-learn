@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @description: 检索结果
- * @author: chenzt
+ * @author: tyron
  * @create: 2026-04-20
  **/
 @Data

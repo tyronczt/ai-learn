@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * @description: Embedding 相似度检索测试接口
- * @author: chenzt
+ * @author: tyron
  * @create: 2026-04-20
  **/
 @Tag(name = "Embedding检索", description = "向量相似度检索相关接口")

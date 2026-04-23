@@ -1,0 +1,72 @@
+package cn.tyron.llm.embedding.milvus;
+
+import io.milvus.v2.client.ConnectConfig;
+import io.milvus.v2.client.MilvusClientV2;
+import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Milvus 向量数据库客户端配置
+ * <p>
+ * 创建并管理 MilvusClientV2 Spring Bean，应用关闭时自动释放连接。
+ *
+ * @author tyron
+ * @create 2026-04-23
+ */
+@Configuration
+public class MilvusConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(MilvusConfig.class);
+
+    @Value("${milvus.host}")
+    private String host;
+
+    @Value("${milvus.port}")
+    private int port;
+
+    @Value("${milvus.collection-name}")
+    private String collectionName;
+
+    @Value("${milvus.vector-dimension}")
+    private int vectorDimension;
+
+    private MilvusClientV2 client;
+
+    @Bean
+    public MilvusClientV2 milvusClientV2() {
+        String uri = String.format("http://%s:%d", host, port);
+        log.info("正在连接 Milvus 服务: {}", uri);
+
+        ConnectConfig config = ConnectConfig.builder()
+                .uri(uri)
+                .build();
+
+        client = new MilvusClientV2(config);
+        log.info("Milvus 客户端连接成功");
+        return client;
+    }
+
+    @PreDestroy
+    public void close() {
+        if (client != null) {
+            try {
+                client.close();
+                log.info("Milvus 客户端连接已关闭");
+            } catch (Exception e) {
+                log.warn("关闭 Milvus 客户端时发生异常: {}", e.getMessage());
+            }
+        }
+    }
+
+    public String getCollectionName() {
+        return collectionName;
+    }
+
+    public int getVectorDimension() {
+        return vectorDimension;
+    }
+}

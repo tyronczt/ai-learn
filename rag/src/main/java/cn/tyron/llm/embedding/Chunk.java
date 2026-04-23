@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @description: Chunk 元数据
- * @author: chenzt
+ * @author: tyron
  * @create: 2026-04-20
  **/
 @Data
