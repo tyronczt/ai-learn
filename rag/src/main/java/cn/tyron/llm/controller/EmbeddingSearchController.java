@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
@@ -34,43 +33,35 @@ public class EmbeddingSearchController {
 
     private static final Logger log = LoggerFactory.getLogger(EmbeddingSearchController.class);
 
-    private static final String SILICONFLOW_URL = "https://api.siliconflow.cn/v1/embeddings";
-    private static final String SILICONFLOW_API_KEY = "sk-yrdxaaxehbwwvjxdzknnvpmhucghixmnmpdsabltekuaegbd";
-    private static final String MODEL = "Qwen/Qwen3-Embedding-8B";
-
-    private final RestClient restClient = RestClient.create();
-
     @Autowired
     private EmbeddingSearchService embeddingSearchService;
 
     /**
-     * 直接调用 SiliconFlow Embedding API
+     * 直接调用 Embedding API（通过统一配置的 EmbeddingModel，含超时设置）
      */
-    @Operation(summary = "SiliconFlow Embedding", description = "直接调用 SiliconFlow API 获取文本向量")
+    @Operation(summary = "SiliconFlow Embedding", description = "调用 Embedding API 获取文本向量")
     @PostMapping(value = "/embed", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> embed(@Parameter(description = "待向量化的文本列表", required = true)
                                        @RequestBody Map<String, Object> request) {
-        log.info("收到 embedding 请求: {}", request);
-
         @SuppressWarnings("unchecked")
         List<String> texts = (List<String>) request.get("input");
+        log.info("收到 embedding 请求, textCount={}", texts.size());
 
-        Map<String, Object> apiRequest = Map.of(
-                "model", MODEL,
-                "input", texts,
-                "encoding_format", "float"
-        );
+        // 使用统一配置的 EmbeddingModel（含超时设置），而非自建无超时 RestClient
+        var embeddingResponse = embeddingSearchService.embed(texts);
 
-        Map<String, Object> response = restClient.post()
-                .uri(SILICONFLOW_URL)
-                .header("Authorization", "Bearer " + SILICONFLOW_API_KEY)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(apiRequest)
-                .retrieve()
-                .body(new org.springframework.core.ParameterizedTypeReference<>() {});
-
-        log.info("Embedding 成功, textCount={}", texts.size());
-        return response;
+        // 构造与 SiliconFlow API 兼容的返回格式
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("model", "Qwen/Qwen3-Embedding-8B");
+        result.put("data", embeddingResponse.stream()
+                .map(arr -> {
+                    Map<String, Object> item = new java.util.HashMap<>();
+                    item.put("embedding", arr);
+                    return item;
+                })
+                .toList());
+        result.put("usage", Map.of("prompt_tokens", 0, "total_tokens", 0));
+        return result;
     }
 
     /**

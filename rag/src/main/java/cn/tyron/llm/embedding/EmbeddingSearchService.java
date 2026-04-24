@@ -55,7 +55,11 @@ public class EmbeddingSearchService {
                     })
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("向量化失败, textCount={}", texts.size(), e);
+            log.error("向量化失败, textCount={}, errorType={}, error={}",
+                    texts.size(),
+                    e.getClass().getSimpleName(),
+                    e.getMessage(),
+                    e);
             throw new RuntimeException("向量化失败: " + e.getMessage(), e);
         }
     }
@@ -130,7 +134,11 @@ public class EmbeddingSearchService {
                             if (attempt == retries - 1) {
                                 throw e;
                             }
-                            log.warn("向量化重试, attempt={}, error={}", attempt + 1, e.getMessage());
+                            log.warn("向量化重试, attempt={}, batchSize={}, errorType={}, error={}",
+                                    attempt + 1,
+                                    batch.size(),
+                                    e.getClass().getSimpleName(),
+                                    e.getMessage());
                             try {
                                 Thread.sleep(backoff);
                                 backoff *= 2;
@@ -200,9 +208,9 @@ public class EmbeddingSearchService {
         // 1. 准备 chunks（带元数据）
         List<Chunk> chunks = prepareChunks();
 
-        // 2. 批量向量化所有 chunks
+        // 2. 批量向量化所有 chunks（batchSize=10 避免单次请求过大导致超时）
         List<String> texts = chunks.stream().map(Chunk::getContent).collect(Collectors.toList());
-        List<double[]> chunkVectors = embedBatch(texts, 20, 3);
+        List<double[]> chunkVectors = embedBatch(texts, 10, 2);
 
         // 3. 检索
         return search(chunks, chunkVectors, query, topK);

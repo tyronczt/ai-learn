@@ -5,3 +5,10 @@ target
 /agent/agentscope/.project
 /.vscode/settings.json
 rag/src/main/resources/application.yml
+/.codebuddy/
+/.qoder/
+/.tocodex/
+/.venv/
+/.vscode/
+/.claude/
+/CLAUDE.md

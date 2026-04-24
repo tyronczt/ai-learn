@@ -99,37 +99,38 @@ public class MilvusVectorController {
 
     // ===================== 向量检索 =====================
 
-    @Operation(summary = "向量相似度检索", description = "输入查询文本，执行 ANN 近似最近邻向量检索")
+    @Operation(summary = "向量相似度检索", description = "输入查询文本，执行 ANN 近似最近邻向量检索，可选传入 sourceFilter 或 filterExpression 做元数据过滤")
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> search(
             @RequestBody MilvusSearchRequest request) {
-        log.info("收到向量检索请求, query='{}', topK={}", request.getQuery(), request.getTopK());
+        log.info("收到向量检索请求, query='{}', topK={}, sourceFilter='{}', filter='{}'",
+                request.getQuery(), request.getTopK(), request.getSourceFilter(), request.getFilterExpression());
 
         int topK = request.getTopK() > 0 ? request.getTopK() : 5;
-        List<MilvusSearchResult> results = milvusVectorService.search(request.getQuery(), topK);
+        List<MilvusSearchResult> results;
+        if ((request.getSourceFilter() != null && !request.getSourceFilter().isBlank())
+                || (request.getFilterExpression() != null && !request.getFilterExpression().isBlank())) {
+            results = milvusVectorService.hybridSearch(new MilvusSearchRequest(
+                    request.getQuery(),
+                    topK,
+                    request.getSourceFilter(),
+                    request.getFilterExpression()
+            ));
+        } else {
+            results = milvusVectorService.hybridSearch(new MilvusSearchRequest(
+                    request.getQuery(),
+                    topK,
+                    null,
+                    null
+            ));
+        }
 
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "query", request.getQuery(),
                 "topK", topK,
-                "resultCount", results.size(),
-                "results", results
-        ));
-    }
-
-    @Operation(summary = "混合检索", description = "向量相似度检索 + 元数据过滤（如按 source 筛选）")
-    @PostMapping("/hybrid-search")
-    public ResponseEntity<Map<String, Object>> hybridSearch(
-            @RequestBody MilvusSearchRequest request) {
-        log.info("收到混合检索请求, query='{}', topK={}, sourceFilter='{}', filter='{}'",
-                request.getQuery(), request.getTopK(), request.getSourceFilter(), request.getFilterExpression());
-
-        List<MilvusSearchResult> results = milvusVectorService.hybridSearch(request);
-
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "query", request.getQuery(),
-                "topK", request.getTopK() > 0 ? request.getTopK() : 5,
+                "sourceFilter", request.getSourceFilter(),
+                "filterExpression", request.getFilterExpression(),
                 "resultCount", results.size(),
                 "results", results
         ));

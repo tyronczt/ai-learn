@@ -43,10 +43,16 @@ public class MilvusConfig {
 
         ConnectConfig config = ConnectConfig.builder()
                 .uri(uri)
+                .connectTimeoutMs(10000)       // 连接超时 10 秒
+                .rpcDeadlineMs(30000)          // 单次 RPC 调用超时 30 秒（insert/search 等）
+                .keepAliveTimeMs(55000)        // 每 55 秒发送 keepAlive 探测
+                .keepAliveTimeoutMs(20000)     // keepAlive 响应超时 20 秒
+                .keepAliveWithoutCalls(true)   // 空闲时也发送 keepAlive，防止连接被中间设备断开
+                .idleTimeoutMs(300000)         // 空闲 5 分钟后释放连接
                 .build();
 
         client = new MilvusClientV2(config);
-        log.info("Milvus 客户端连接成功");
+        log.info("Milvus 客户端连接成功 (connectTimeout=10s, rpcDeadline=30s, keepAlive=55s)");
         return client;
     }
 

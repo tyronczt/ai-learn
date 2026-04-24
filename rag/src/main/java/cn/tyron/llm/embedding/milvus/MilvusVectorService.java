@@ -210,14 +210,21 @@ public class MilvusVectorService {
             throw new IllegalArgumentException("插入的 Chunk 列表不能为空");
         }
 
+        long totalStart = System.currentTimeMillis();
+
+        // 阶段1：检查/创建 Collection
+        long phaseStart = System.currentTimeMillis();
         if (!hasCollection()) {
             createCollection();
         }
+        log.info("[耗时统计] Collection 检查/创建: {}ms", System.currentTimeMillis() - phaseStart);
 
         List<String> texts = chunks.stream()
                 .map(Chunk::getContent)
                 .collect(Collectors.toList());
 
+        // 阶段2：Embedding 向量化
+        phaseStart = System.currentTimeMillis();
         log.info("开始向量化 {} 个文本块...", texts.size());
         List<double[]> embeddings;
         try {
@@ -225,8 +232,11 @@ public class MilvusVectorService {
         } catch (Exception e) {
             throw new RuntimeException("Embedding 向量化失败: " + e.getMessage(), e);
         }
-        log.info("向量化完成, 向量数量={}, 维度={}", embeddings.size(), embeddings.get(0).length);
+        long embeddingCost = System.currentTimeMillis() - phaseStart;
+        log.info("向量化完成, 向量数量={}, 维度={}, 耗时={}ms", embeddings.size(), embeddings.get(0).length, embeddingCost);
 
+        // 阶段3：构建数据行
+        phaseStart = System.currentTimeMillis();
         List<JsonObject> rows = new ArrayList<>();
         for (int i = 0; i < chunks.size(); i++) {
             Chunk chunk = chunks.get(i);
@@ -238,32 +248,28 @@ public class MilvusVectorService {
             row.add(FIELD_VECTOR, gson.toJsonTree(vector));
             rows.add(row);
         }
+        log.debug("[耗时统计] 数据行构建: {}ms", System.currentTimeMillis() - phaseStart);
 
+        // 阶段4：Milvus 插入
+        phaseStart = System.currentTimeMillis();
         try {
             InsertResp insertResp = milvusClient.insert(InsertReq.builder()
                     .collectionName(collectionName)
                     .data(rows)
                     .build());
             int insertCount = Math.toIntExact(insertResp.getInsertCnt());
-            log.info("向量数据插入成功, 插入行数={}", insertCount);
+            long insertCost = System.currentTimeMillis() - phaseStart;
+            long totalCost = System.currentTimeMillis() - totalStart;
+            log.info("向量数据插入成功, 插入行数={}, Milvus插入耗时={}ms, 总耗时={}ms", insertCount, insertCost, totalCost);
             return insertCount;
         } catch (Exception e) {
+            long insertCost = System.currentTimeMillis() - phaseStart;
+            log.error("Milvus 插入失败, 已耗时={}ms, error={}", insertCost, e.getMessage());
             throw new RuntimeException("Milvus 插入失败: " + e.getMessage(), e);
         }
     }
 
     // ===================== 向量检索 =====================
-
-    /**
-     * 纯向量相似度检索（ANN）
-     *
-     * @param query 查询文本
-     * @param topK  返回数量
-     * @return 检索结果列表
-     */
-    public List<MilvusSearchResult> search(String query, int topK) {
-        return doSearch(query, topK, null);
-    }
 
     /**
      * 混合检索（向量 + 元数据过滤）
@@ -415,15 +421,24 @@ public class MilvusVectorService {
      * 构建过滤表达式
      */
     private String buildFilterExpression(MilvusSearchRequest request) {
+        if (request == null) {
+            return null;
+        }
+
         // 优先使用自定义表达式
         if (request.getFilterExpression() != null && !request.getFilterExpression().isBlank()) {
-            return request.getFilterExpression();
+            return request.getFilterExpression().trim();
         }
         // 使用 sourceFilter 构建简单过滤
         if (request.getSourceFilter() != null && !request.getSourceFilter().isBlank()) {
-            return String.format("%s == '%s'", FIELD_SOURCE, request.getSourceFilter());
+            return String.format("%s == '%s'", FIELD_SOURCE, escapeMilvusStringLiteral(request.getSourceFilter().trim()));
         }
         return null;
+    }
+
+    private String escapeMilvusStringLiteral(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("'", "\\'");
     }
 
     /**
